@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import {addShips, generateFields, initStats, initTrackballControls} from './util'
 import {checkCollision, checkIfDestroyed, checkIfPlaceable, rotateDragableObjects, checkIfPlaceableEnemy, checkCollisionEnemy} from './gameUtils'
 import {DragControls} from "three/addons/controls/DragControls.js";
+import {addStyleObject} from './styleObjects'
 import {
     ambientLight,
     directionalLight,
@@ -46,6 +47,8 @@ scene.add(spotLight)
 scene.add(directionalLight)
 scene.add(ambientLight)
 
+addStyleObject(scene);
+
 // camera.position.set(-90, 80, 0)
 camera.position.set(-120, 80, 0);
 
@@ -74,7 +77,7 @@ function placeEnemyShips() {
 
         const randomFieldNumber = Math.floor(Math.random() * (enemyFields.length));
         ship.position.copy(enemyFields[randomFieldNumber].position);
-        ship.position.x = -ship.geometry.parameters.height / 2 - 0.01 + enemyGameboard.position.y;
+        ship.position.x = -ship.geometry.parameters.height / 2 - 0.05 + enemyGameboard.position.y;
         ship.rotated = Math.floor(Math.random() * 2) === 1;
         if (ship.rotated) {
             ship.rotation.x = 90 * (Math.PI / 180);
@@ -293,7 +296,7 @@ window.addEventListener('pointermove', (e) => {
 
         selectedObj.position.copy(intersect.point).add(intersect.face.normal);
         selectedObj.position.divideScalar(5).floor().multiplyScalar(5).addScalar(2.5);
-        selectedObj.position.y = selectedObj.geometry.parameters.height / 2 + 0.01;
+        selectedObj.position.y = selectedObj.geometry.parameters.height / 2 + 0.05;
         if (!selectedObj.rotated) {
             if (selectedObj.geometry.parameters.width % 10 === 0)
                 selectedObj.position.x += 2.5;

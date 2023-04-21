@@ -18,7 +18,7 @@ function adjustPosition(objWidth, objAxe) {
 
 function checkIfPlaceable(obj, board) {
     let placeable = true;
-    if (obj.position.y !== 1.26) {
+    if (obj.position.y !== 1.30) {
         placeable = false;
     }
     if (!obj.rotated) {

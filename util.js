@@ -40,11 +40,11 @@ function generateFields(board, scene) {
             box.name = 'field'
             if (board.name === 'enemy') {
                 box.isEnemy = true;
-                box.position.x = -0.01 + board.position.x;
+                box.position.x = -0.05 + board.position.x;
                 box.position.y = -((board.geometry.parameters.height) / 2) + 0.25 + size / 2 + (size + 0.5) * i + board.position.y
                 box.position.z = -((board.geometry.parameters.height) / 2) + 0.25 + size / 2 + (size + 0.5) * j + board.position.z
             } else {
-                box.position.y = 0.01 + board.position.y;
+                box.position.y = 0.05 + board.position.y;
                 box.position.x = -((board.geometry.parameters.height) / 2) + 0.25 + size / 2 + (size + 0.5) * i + board.position.x
                 box.position.z = -((board.geometry.parameters.height) / 2) + 0.25 + size / 2 + (size + 0.5) * j + board.position.z
             }
