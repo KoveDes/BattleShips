@@ -16,7 +16,7 @@ function adjustPosition(objWidth, objAxe) {
     return objAxe;
 }
 
-function checkIfPlaceable(obj, board, group) {
+function checkIfPlaceable(obj, board) {
     let placeable = true;
     if (obj.position.y !== 1.26) {
         placeable = false;
@@ -34,6 +34,27 @@ function checkIfPlaceable(obj, board, group) {
     }
     return placeable
 }
+
+function checkIfPlaceableEnemy(obj, board) {
+    let placeable = true;
+    // if (obj.position.x !== 34.99) {
+    //     placeable = false;
+    // }
+    if (!obj.rotated) {
+        if ((obj.position.z + obj.geometry.parameters.width / 2) > board.position.z + board.geometry.parameters.width / 2 ||
+            (obj.position.z - obj.geometry.parameters.width / 2) < board.position.z - board.geometry.parameters.width / 2) {
+            placeable = false;
+        }
+    } else {
+        if ((obj.position.y + obj.geometry.parameters.width / 2) > board.geometry.parameters.width + 10 ||
+            (obj.position.y - obj.geometry.parameters.width / 2) < 10) {
+            placeable = false;
+
+        }
+    }
+    return placeable;
+}
+
 
 function checkCollision(ship, objWidth, objZC, objXC, insert, scene) {
     if (ship.rotated) {
@@ -62,16 +83,51 @@ function checkCollision(ship, objWidth, objZC, objXC, insert, scene) {
     }
 }
 
+function checkCollisionEnemy(ship, objWidth, objYC, objZC, insert, scene) {
+    if (ship.rotated) {
+        objYC = adjustPosition(objWidth, objYC);
+        for (let j = 0; j < objWidth; j += 5) {
+            for (const field of scene.children) {
+                if (field.name === 'field' && field.position.z === objZC) {
+                    if (field.position.y === objYC - j) {
+                        insert(field)
+                    }
+
+                }
+            }
+        }
+    } else {
+        objZC = adjustPosition(objWidth, objZC);
+        for (let j = 0; j < objWidth; j += 5) {
+            for (const field of scene.children) {
+                if (field.name === 'field' && field.position.y === objYC) {
+                    if (field.position.z === objZC - j) {
+                        insert(field)
+                    }
+                }
+            }
+        }
+    }
+}
+
 function checkIfDestroyed(fields, enemyShips) {
     for (const enemyShip in enemyShips) {
         const ship = enemyShips[enemyShip];
         const size = ship.geometry.parameters.width / 5
         if (size === fields.filter(field => field.ship === ship.name).length) {
-            console.log('Zatopiony: '+ ship.name);
-            ship.scale.set(1, 5, 1);
+            console.log('Zatopiony: ' + ship.name);
+            ship.scale.set(1, 1, 1);
 
         }
     }
 }
 
-export {rotateDragableObjects, adjustPosition, checkIfPlaceable, checkCollision, checkIfDestroyed}
+export {
+    rotateDragableObjects,
+    adjustPosition,
+    checkIfPlaceable,
+    checkCollision,
+    checkIfDestroyed,
+    checkIfPlaceableEnemy,
+    checkCollisionEnemy
+}

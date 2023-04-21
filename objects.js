@@ -8,8 +8,12 @@ class Ship3D {
         // this.createShip();
     }
 
-    createShip() {
+    createShip(enemy) {
         const geometry = new THREE.BoxGeometry(this.width, 2.5, 5);
+        if(enemy) {
+            geometry.rotateY(-Math.PI / 2);
+            geometry.rotateZ(-Math.PI / 2)
+        }
         const material = new THREE.MeshLambertMaterial({
             color: this.color
         });
@@ -27,11 +31,11 @@ const cruiser = new Ship3D('cruiser', 15, 'purple').createShip();
 const battleship = new Ship3D('battleship', 20, 'orange').createShip();
 const carrier = new Ship3D('carrier', 25, 'blue').createShip();
 
-const enemyDestroyer = new Ship3D('enemyDestroyer', 10, 'brown').createShip();
-const enemySubmarine = new Ship3D('enemySubmarine', 15, 'green').createShip();
-const enemyCruiser = new Ship3D('enemyCruiser', 15, 'purple').createShip();
-const enemyBattleship = new Ship3D('enemyBattleship', 20, 'orange').createShip();
-const enemyCarrier = new Ship3D('enemyCarrier', 25, 'blue').createShip();
+const enemyDestroyer = new Ship3D('enemyDestroyer', 10, 'brown').createShip(true);
+const enemySubmarine = new Ship3D('enemySubmarine', 15, 'green').createShip(true);
+const enemyCruiser = new Ship3D('enemyCruiser', 15, 'purple').createShip(true);
+const enemyBattleship = new Ship3D('enemyBattleship', 20, 'orange').createShip(true);
+const enemyCarrier = new Ship3D('enemyCarrier', 25, 'blue').createShip(true);
 
 const ships = {
     destroyer,
@@ -74,10 +78,13 @@ gameboard.receiveShadow = true;
 gameboard.name = 'player'
 gameboard.position.set(0, 0, 0);
 
-const enemyGameboard = new THREE.Mesh(gameboardGeometry, gameboardMaterial);
+const enemyGbGeo = new THREE.PlaneGeometry(50,50);
+enemyGbGeo.rotateY(-Math.PI / 2);
+const enemyGameboard = new THREE.Mesh(enemyGbGeo, gameboardMaterial);
+// const enemyGameboard = new THREE.Mesh(gameboardGeometry, gameboardMaterial);
 enemyGameboard.receiveShadow = true;
 enemyGameboard.name = 'enemy';
-enemyGameboard.position.set(70,0,0);
+enemyGameboard.position.set(35,35,0);
 
 const shipGroups = {
     destroyerGroup: new THREE.Group(),

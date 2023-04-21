@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {addShips, generateFields, initStats, initTrackballControls} from './util'
-import {checkCollision, checkIfDestroyed, checkIfPlaceable, rotateDragableObjects} from './gameUtils'
+import {checkCollision, checkIfDestroyed, checkIfPlaceable, rotateDragableObjects, checkIfPlaceableEnemy, checkCollisionEnemy} from './gameUtils'
 import {DragControls} from "three/addons/controls/DragControls.js";
 import {
     ambientLight,
@@ -46,8 +46,11 @@ scene.add(spotLight)
 scene.add(directionalLight)
 scene.add(ambientLight)
 
-camera.position.set(-90, 80, 0)
+// camera.position.set(-90, 80, 0)
+camera.position.set(-120, 80, 0);
+
 camera.lookAt(scene.position)
+
 
 
 let trackballControls = initTrackballControls(camera, renderer);
@@ -67,31 +70,32 @@ function placeEnemyShips() {
     for (const obj in enemyShips) {
         const ship = enemyShips[obj];
         ship.position.set(50, 0, 45);
-        ship.rotation.y = 0;
+        ship.rotation.x = 0;
 
         const randomFieldNumber = Math.floor(Math.random() * (enemyFields.length));
         ship.position.copy(enemyFields[randomFieldNumber].position);
-        ship.position.y = ship.geometry.parameters.height / 2 + 0.01;
+        ship.position.x = -ship.geometry.parameters.height / 2 - 0.01 + enemyGameboard.position.y;
         ship.rotated = Math.floor(Math.random() * 2) === 1;
         if (ship.rotated) {
-            ship.rotation.y = 90 * (Math.PI / 180);
+            ship.rotation.x = 90 * (Math.PI / 180);
             if (ship.geometry.parameters.width % 10 === 0)
-                ship.position.z += 2.5
+                ship.position.y += 2.5
         } else {
             if (ship.geometry.parameters.width % 10 === 0)
-                ship.position.x += 2.5;
+                ship.position.z += 2.5;
         }
 
-        isOk.push(checkIfPlaceable(ship, enemyGameboard))
-        if (!checkIfPlaceable(ship, enemyGameboard)) {
-            ship.rotation.y = 0;
-            ship.position.set(50, 0, 20);
+        isOk.push(checkIfPlaceableEnemy(ship, enemyGameboard))
+        if (!checkIfPlaceableEnemy(ship, enemyGameboard)) {
+            ship.rotation.x = 0;
+            ship.position.set(0, 0, 0);
         }
         const currGroup = enemyShipGroups[`${ship.name}Group`];
-        let {x: objXC, z: objZC} = ship.position;
+        let {x: objXC, y: objYC, z: objZC} = ship.position;
         let objWidth = ship.geometry.parameters.width;
+        // console.log(ship.position);
         //Sprawdz czy statki nie nakładają się na siebie
-        checkCollision(ship, objWidth, objZC, objXC, (field) => {
+        checkCollisionEnemy(ship, objWidth, objYC, objZC, (field) => {
             if (field.taken) {
                 isOk.push(false);
             }
@@ -107,10 +111,10 @@ function placeEnemyShips() {
         }
 
 
-        let {x: objX, z: objZ} = ship.position;
+        let {y: objY, z: objZ} = ship.position;
 
         //Co zrobic gdy pole jest pod statkiem
-        checkCollision(ship, objWidth, objZ, objX, (field) => {
+        checkCollisionEnemy(ship, objWidth, objY, objZ, (field) => {
             field.scale.y = 1;
             field.taken = true;
             ship.scale.set(0, 0, 0);
@@ -162,6 +166,7 @@ function computerGuess() {
     }
 }
 
+placeEnemyShips()
 let done = false;
 while (!done) {
     done = placeEnemyShips();
@@ -442,7 +447,7 @@ function animate() {
     if (gameFinished) {
         turn = '';
     }
-    
+
     if (controls.trackBalls)
         trackballControls.update(clock.getDelta());
     requestAnimationFrame(animate);

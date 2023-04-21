@@ -1,4 +1,3 @@
-
 import {TrackballControls} from "three/addons/controls/TrackballControls";
 import * as THREE from "three";
 
@@ -26,9 +25,13 @@ function initTrackballControls(camera, renderer) {
 
     return trackballControls;
 }
+
 function generateFields(board, scene) {
     const size = board.geometry.parameters.width / 10 - 0.5;
     const cubeGeo = new THREE.BoxGeometry(size, 0.01, size);
+    if(board.name === 'enemy') {
+        cubeGeo.rotateZ(-Math.PI/2);
+    }
     for (let i = 0; i < 10; i++) {
         for (let j = 0; j < 10; j++) {
             const cubeMaterial = new THREE.MeshLambertMaterial({color: '#f8f500', transparent: true, opacity: 0.75});
@@ -37,11 +40,17 @@ function generateFields(board, scene) {
             box.name = 'field'
             if (board.name === 'enemy') {
                 box.isEnemy = true;
+                box.position.x = -0.01 + board.position.x;
+                box.position.y = -((board.geometry.parameters.height) / 2) + 0.25 + size / 2 + (size + 0.5) * i + board.position.y
+                box.position.z = -((board.geometry.parameters.height) / 2) + 0.25 + size / 2 + (size + 0.5) * j + board.position.z
+            } else {
+                box.position.y = 0.01 + board.position.y;
+                box.position.x = -((board.geometry.parameters.height) / 2) + 0.25 + size / 2 + (size + 0.5) * i + board.position.x
+                box.position.z = -((board.geometry.parameters.height) / 2) + 0.25 + size / 2 + (size + 0.5) * j + board.position.z
             }
-            box.position.y = 0.01 + board.position.y;
-            box.position.x = -((board.geometry.parameters.height) / 2) + 0.25 + size / 2 + (size + 0.5) * i + board.position.x
-            box.position.z = -((board.geometry.parameters.height) / 2) + 0.25 + size / 2 + (size + 0.5) * j + board.position.z
             scene.add(box);
+            if(board.name === 'enemy') {
+            }
         }
     }
 }
