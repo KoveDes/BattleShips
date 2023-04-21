@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BattleShips 3d</title>
+  <style>
+    body {
+      margin: 0;
+        text-align: center;
+    }
+    div.p {
+        position: absolute;
+        left:50%;
+
+    }
+    button {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 5px;
+        color: white;
+        background-color: black;
+    }
+  </style>
+    <!--  Scripts-->
+    <script src="util/Stats.js"></script>
+    <script src="util/dat.gui.js"></script>
+    <script type="module" src="util.js"></script>
+    <script type="module" src="gameUtils.js"></script>
+
+
+</head>
+<body>
+<!--<button>Losowo ułóż statki</button>-->
+
+<div class="p"></div>
+<button class="start">Start</button>
+
+<script type="module" src="main.js"></script>
+<!--<script type="module" src="test.js"></script>-->
+</body>
+</html>
