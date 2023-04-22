@@ -8,18 +8,24 @@
       margin: 0;
         text-align: center;
     }
-    div.p {
-        position: absolute;
-        left:50%;
 
-    }
-    button {
+    .info, .game-info {
+        z-index: 999999999999;
         position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-        padding: 5px;
+        width: 100vw;
+        /*left: 0;*/
+        bottom: 0;
+        font-family: Calibri;
+        text-transform: uppercase;
+        font-size: 25px;
+        padding: 15px 0;
         color: white;
-        background-color: black;
+        background-color: #014e72;
+    }
+    .game-info {
+        opacity: 0;
+        background-color: greenyellow;
+        color: black;
     }
   </style>
     <!--  Scripts-->
@@ -34,7 +40,8 @@
 <!--<button>Losowo ułóż statki</button>-->
 
 <div class="p"></div>
-<button class="start">Start</button>
+<div class="info">Aby rozpocząć grę, umieść statki na planszy i naciśnij zielony przycisk</div>
+<div class="game-info"> </div>
 
 <script type="module" src="main.js"></script>
 <!--<script type="module" src="test.js"></script>-->

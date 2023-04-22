@@ -37,9 +37,6 @@ function checkIfPlaceable(obj, board) {
 
 function checkIfPlaceableEnemy(obj, board) {
     let placeable = true;
-    // if (obj.position.x !== 34.99) {
-    //     placeable = false;
-    // }
     if (!obj.rotated) {
         if ((obj.position.z + obj.geometry.parameters.width / 2) > board.position.z + board.geometry.parameters.width / 2 ||
             (obj.position.z - obj.geometry.parameters.width / 2) < board.position.z - board.geometry.parameters.width / 2) {
@@ -54,7 +51,6 @@ function checkIfPlaceableEnemy(obj, board) {
     }
     return placeable;
 }
-
 
 function checkCollision(ship, objWidth, objZC, objXC, insert, scene) {
     if (ship.rotated) {
@@ -110,13 +106,15 @@ function checkCollisionEnemy(ship, objWidth, objYC, objZC, insert, scene) {
     }
 }
 
-function checkIfDestroyed(fields, enemyShips) {
+
+function checkIfDestroyed(fields, enemyShips, player) {
     for (const enemyShip in enemyShips) {
         const ship = enemyShips[enemyShip];
         const size = ship.geometry.parameters.width / 5
         if (size === fields.filter(field => field.ship === ship.name).length) {
             console.log('Zatopiony: ' + ship.name);
             ship.scale.set(1, 1, 1);
+            ship.material.color.setHex(0x999999);
 
         }
     }

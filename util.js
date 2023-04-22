@@ -59,7 +59,7 @@ function generateFields(board, scene) {
 function addShips(ships, board, draggable, scene, draggableObjects) {
     let z = 30;
     for (const ship in ships) {
-        ships[ship].position.set(board.position.x, 0, z);
+        ships[ship].position.set(board.position.x, 2.5, z);
         z += 5;
         if (draggable) draggableObjects.push(ships[ship])
         scene.add(ships[ship]);

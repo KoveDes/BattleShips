@@ -15,7 +15,7 @@ class Ship3D {
             geometry.rotateZ(-Math.PI / 2)
         }
         const material = new THREE.MeshLambertMaterial({
-            color: this.color
+            color: this.color, transparent: true,
         });
         const ship = new THREE.Mesh(geometry, material);
         ship.castShadow = true;
@@ -53,25 +53,28 @@ const enemyShips = {
 }
 
 
+
+
 //Lights
-const spotLight = new THREE.SpotLight(0xFFFFFF);
-spotLight.position.set(-40, 40, -15);
+const spotLight = new THREE.SpotLight('#030303');
+spotLight.position.set(-50, 50, 90);
+spotLight.shadow.mapSize = new THREE.Vector2(1024 * 2, 1024 * 2);
 spotLight.castShadow = true;
-spotLight.shadow.mapSize = new THREE.Vector2(1024 * 2, 1024 * 2)
 
-const directionalLight = new THREE.SpotLight('#e30f0f');
-directionalLight.position.set(-20, 40, 60);
-directionalLight.castShadow = true;
-directionalLight.shadow.mapSize = new THREE.Vector2(1024 * 2, 1024 * 2)
+const directionalLight = new THREE.SpotLight('#ffffff');
+directionalLight.position.set(-60, 120, -10);
+directionalLight.shadow.mapSize = new THREE.Vector2(1024 * 4, 1024 * 4);
 
-const ambientLight = new THREE.AmbientLight(0x353535);
+const ambientLight = new THREE.AmbientLight('#2a2a2a');
+ambientLight.castShadow = true;
+
 
 //GameBoard
 const gameboardGeometry = new THREE.PlaneGeometry(50, 50);
 gameboardGeometry.rotateX(-Math.PI / 2)
 
 const gameboardMaterial = new THREE.MeshLambertMaterial({
-    color: '#bbbb15'
+    color: '#ffffff'
 });
 const gameboard = new THREE.Mesh(gameboardGeometry, gameboardMaterial);
 gameboard.receiveShadow = true;

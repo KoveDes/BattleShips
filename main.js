@@ -1,8 +1,15 @@
 import * as THREE from 'three';
-import {addShips, generateFields, initStats, initTrackballControls} from './util'
-import {checkCollision, checkIfDestroyed, checkIfPlaceable, rotateDragableObjects, checkIfPlaceableEnemy, checkCollisionEnemy} from './gameUtils'
+import {addShips, generateFields} from './util'
+import {
+    checkCollision,
+    checkCollisionEnemy,
+    checkIfDestroyed,
+    checkIfPlaceable,
+    checkIfPlaceableEnemy,
+    rotateDragableObjects
+} from './gameUtils'
 import {DragControls} from "three/addons/controls/DragControls.js";
-import {addStyleObject} from './styleObjects'
+import {addStyleObject, button, shipBox} from './styleObjects'
 import {
     ambientLight,
     directionalLight,
@@ -14,7 +21,8 @@ import {
     ships,
     spotLight
 } from "./objects"
-
+import {MTLLoader} from 'three/addons/loaders/MTLLoader.js';
+import {OBJLoader} from 'three/addons/loaders/OBJLoader.js';
 
 window.addEventListener('resize', onResize, false);
 
@@ -24,7 +32,6 @@ const objRemoved = [];
 const enemyObjRemoved = [];
 const shipCopies = [];
 
-const stats = initStats();
 
 const scene = new THREE.Scene();
 let camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -32,9 +39,10 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 document.body.appendChild(renderer.domElement)
-scene.background = 'white';
+// scene.background = 'white';
 
-
+const gameInfo = document.querySelector('.game-info');
+console.log(gameInfo);
 //Gameboard
 scene.add(gameboard)
 scene.add(enemyGameboard)
@@ -43,21 +51,16 @@ addShips(enemyShips, enemyGameboard, false, scene, draggableObjects);
 generateFields(enemyGameboard, scene);
 generateFields(gameboard, scene);
 
+
 scene.add(spotLight)
 scene.add(directionalLight)
 scene.add(ambientLight)
 
 addStyleObject(scene);
 
-// camera.position.set(-90, 80, 0)
-camera.position.set(-120, 80, 0);
+camera.position.set(-120, 50, 10);
+camera.lookAt(0,20,10)
 
-camera.lookAt(scene.position)
-
-
-
-let trackballControls = initTrackballControls(camera, renderer);
-let clock = new THREE.Clock();
 
 let animateCamera = ''
 let selectedObj;
@@ -65,7 +68,7 @@ let isPlaceable;
 let turn;
 let gameFinished = false;
 const enemyFields = scene.children.filter(o => o.isEnemy);
-
+let winner = '';
 
 function placeEnemyShips() {
 
@@ -148,6 +151,7 @@ function placeEnemyShips() {
 const computerCorrectFields = []
 
 function computerGuess() {
+
     const playerFields = scene.children.filter(o => (o.name === 'field' && !o.isEnemy));
     let randomFieldNumber = Math.floor(Math.random() * (playerFields.length));
     let field = playerFields[randomFieldNumber];
@@ -165,7 +169,9 @@ function computerGuess() {
     field.clicked = 1;
     checkIfDestroyed(computerCorrectFields, shipCopies)
     if (computerCorrectFields.length === 17) {
-        div.textContent = 'Konieceeeeeeeeeeeeeeee';
+        winner = 'computer';
+        gameFinished = true;
+        gameInfo.textContent = 'Komputer wygrywa grę!';
     }
 }
 
@@ -187,6 +193,8 @@ let dragControls = new DragControls([...draggableObjects], camera, renderer.domE
 dragControls.addEventListener('dragstart', (e) => {
     selectedObj = e.object;
     selectedObj.rotated = false;
+    animateCamera = 'drag';
+
 })
 
 
@@ -225,7 +233,7 @@ dragControls.addEventListener('dragend', () => {
                     z = 50;
                     break;
             }
-            selectedObj.position.set(0, 0, z);
+            selectedObj.position.set(0, 2.5, z);
         }
 
         if (isPlaceable) {
@@ -272,8 +280,9 @@ dragControls.addEventListener('dragend', () => {
     // console.log(draggableObjects)
     if (!draggableObjects.length) {
         dragControls.deactivate();
-        // computerGuess()
     }
+    animateCamera = '';
+
 })
 
 
@@ -305,8 +314,6 @@ window.addEventListener('pointermove', (e) => {
                 selectedObj.position.z += 2.5
         }
 
-
-        //selectedObj zamiast boxHelper
     }
 })
 
@@ -315,16 +322,15 @@ window.addEventListener('keydown', (e) => {
     switch (e.code) {
         case 'KeyR':
             rotateDragable = true;
+            break;
 
     }
 })
 window.addEventListener('keyup', (e) => {
     switch (e.code) {
         case 'KeyR':
-            rotateDragableObjects(rotateDragable, selectedObj)
+            rotateDragableObjects(rotateDragable, selectedObj);
             rotateDragable = false;
-            animateCamera = 'drag'
-
             break;
     }
 })
@@ -333,126 +339,170 @@ window.addEventListener('keyup', (e) => {
 //Selecting fields by player
 const correctFields = [];
 window.addEventListener('mousedown', e => {
+    let pointer = new THREE.Vector3();
+    pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+    pointer.y = -((e.clientY / window.innerHeight) * 2 - 1);
+    pointer.z = 0.5;
+    pointer.unproject(camera);
+    let raycaster = new THREE.Raycaster(camera.position, pointer.sub(camera.position).normalize());
+    let intersects = raycaster.intersectObjects(scene.children);
+
     if (turn === 'player') {
-        let pointer = new THREE.Vector3();
-        pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
-        pointer.y = -((e.clientY / window.innerHeight) * 2 - 1);
-        pointer.z = 0.5;
-        pointer.unproject(camera);
-        let raycaster = new THREE.Raycaster(camera.position, pointer.sub(camera.position).normalize());
-        let intersects = raycaster.intersectObjects(scene.children);
         if (intersects.length > 0 && intersects[0].object.clicked !== 1) {
             const selected = intersects[0].object;
             if (selected.name === 'field' && enemyFields.includes(selected)) {
                 if (selected.taken) {
                     correctFields.push(selected);
                     selected.material.color = new THREE.Color('red');
+                    gameInfo.textContent = 'Trafiłeś w statek!';
                 } else {
+                    gameInfo.textContent = 'Nie trafiłeś!';
                     selected.material.color = new THREE.Color('black');
                 }
                 turn = 'computer'
                 selected.clicked = 1;
 
             }
-            checkIfDestroyed(correctFields, enemyShips);
+            checkIfDestroyed(correctFields, enemyShips,);
             if (correctFields.length === 17) {
-                div.textContent = "Gra zakończona"
+                gameInfo.textContent = "Gratulacje! Wygrałeś grę!"
+                winner = 'player';
                 gameFinished = true;
             }
         }
-    } else {
-        console.log('Nie twoja kolej');
     }
 
-}, false)
-
-// Rozpoczęcie gry
-document.querySelector('.start').addEventListener('click', e => {
-    e.preventDefault();
-    animateCamera = 'drag'
-
-    if (draggableObjects.length) {
-        console.log('Nie możesz rozpocząć gry!');
-    } else {
-        console.log("Gra została rozpoczęta: Twoja kolej");
-        document.querySelector('.start').remove();
-        turn = 'player';
-    }
-})
-
-//
-
-//ray
-let tube;
-window.addEventListener('mousemove', (e) => {
-    if (controls.showRay) {
-        let pointer = new THREE.Vector3();
-        pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
-        pointer.y = -((e.clientY / window.innerHeight) * 2 - 1);
-        pointer.z = 0.5
-        pointer.unproject(camera)
-        let raycaster = new THREE.Raycaster(camera.position, pointer.sub(camera.position).normalize());
-        let intersects = raycaster.intersectObjects(scene.children);
-
-        if (intersects.length > 0) {
-            const points = [];
-            points.push(new THREE.Vector3(-90, 70, 30));
-            points.push(intersects[0].point);
-            var mat = new THREE.MeshBasicMaterial({color: '#da3', transparent: true, opacity: 0.6});
-            var tubeGeometry = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points), 140, 0.09);
-
-            if (tube) {
-                scene.remove(tube);
+    if (intersects.length > 0 && intersects[0].object === button) {
+        if (draggableObjects.length) {
+            console.log('Nie możesz rozpocząć gry!');
+            if (trophy) {
+                console.log('Załadowano')
             }
-            if (controls.showRay) {
-                tube = new THREE.Mesh(tubeGeometry, mat);
-                scene.add(tube);
-            }
+        } else {
+            console.log("Gra została rozpoczęta: Twoja kolej");
+            placed = true;
+            turn = 'player';
+            document.querySelector('.info').remove();
+            gameInfo.style.opacity = 1;
         }
     }
 
 }, false)
+let placed = false;
+// Rozpoczęcie gry
+
+
+//Puchar
+let trophy;
+const mtlLoader = new MTLLoader();
+mtlLoader.load('Blank.mtl', function (materials) {
+    const loader = new OBJLoader();
+    loader.setMaterials(materials);
+    loader.load('trophy.obj', function (obj) {
+        trophy = obj;
+        scene.add(trophy);
+    })
+});
 
 const controls = {
     showRay: false,
     trackBalls: false,
 }
 
-//GUI
-const gui = new dat.GUI();
-gui.add(controls, 'showRay').onChange(function (e) {
-    if (tube) scene.remove(tube)
-})
-gui.add(controls, 'trackBalls')
+function cDrag() {
+    // let xL = = 10;
 
+    if (camera.position.x < -41) {
+        camera.position.x += 2;
+        camera.lookAt(10,-20,10)
+        camera.updateProjectionMatrix();
+    }
 
-function cc() {
+}
+function cToTrophy() {
+}
+
+function deleteButton() {
+    if (button.scale.y > 0)
+        button.scale.y -= 0.025;
+    (button.geometry.parameters);
+    if (button.scale.y <= 0) {
+        button.scale.z = 0;
+        button.scale.x = 0;
+
+    }
+}
+function moveToDefault() {
     let x = camera.position.x
-    console.log(x)
-    while (x < -70) {
-        x += 0.1;
-        camera.position.x += 0.01;
+    while (x > -120) {
+        x -= 0.1;
+        camera.position.x -= 0.01;
+        camera.lookAt(0,20,10)
         camera.updateProjectionMatrix();
     }
 }
 
+function animateWinning(winner) {
+    if (winner === 'player') {
+        if (shipBox.position.y <= 0) {
+            shipBox.position.y += 0.05;
+        }
+    } else {
+        shipBox.rotation.z = -Math.PI / 2;
+        shipBox.position.x = 32.5
+        // shipBox.material.opacity = 0;
+        shipBox.position.y = 40 - 2.5;
+        trophy.position.y = 40 - 2.5;
+        trophy.position.x = 32.5;
+        trophy.rotation.y = -Math.PI / 2;
+    }
+    if (trophy.scale.x < 1.5) {
+        trophy.scale.x += 0.02;
+        trophy.scale.y += 0.02;
+        trophy.scale.z += 0.02;
+    }
+}
+
+let trophyLoaded = false;
+
 function animate() {
-    stats.update()
 
     if (turn === 'computer') {
         computerGuess();
-        cc()
     }
-    if(animateCamera === 'drag') {
-        cc();
+
+    switch (animateCamera) {
+        case "drag":
+            cDrag();
+            break;
+        case "gameOver":
+            cToTrophy();
+            break;
+        default: {
+            moveToDefault()
+        }
+    }
+    if (placed) {
+        deleteButton()
     }
 
     if (gameFinished) {
         turn = '';
     }
+    if (trophy && !trophyLoaded) {
+        trophy.rotation.x = -Math.PI / 2;
+        trophy.rotation.z = -Math.PI / 2;
+        trophy.position.set(0, 1.5, 40);
+        trophy.scale.set(0, 0, 0);
+        trophyLoaded = true;
+    }
 
-    if (controls.trackBalls)
-        trackballControls.update(clock.getDelta());
+    if (winner) {
+        cToTrophy()
+        animateWinning(winner);
+
+    }
+
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
 }
